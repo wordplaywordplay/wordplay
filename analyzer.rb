@@ -2,6 +2,7 @@ require 'bundler/setup'
 require 'treat'
 require 'scalpel'
 require 'engtagger'
+require 'set'
 require 'pry'
 
 
@@ -32,28 +33,50 @@ class DocumentTest
 end
 
 class WordTypeDensityTest < DocumentTest
-  def initialize(documents, word_type)
+  def initialize(documents, word_types)
     super(documents)
-    @word_type = word_type
+    @word_types = Set.new(word_types)
   end
 
   def test
-    metric_values = documents.map do |document|
+    densities = documents.map do |document|
       words = document.words
-      words_of_type = words.select { |word| word.category == @word_type }
-
       total_words = words.size
-      total_words_of_type = words_of_type.size
 
-      Float(total_words_of_type) / Float(total_words)
+      word_type_totals = count_words_by_type(words)
+      calculate_densities(total_words, word_type_totals)
     end
 
-    Metric.new("#{@word_type}_density", metric_values)
+    @word_types.map do |word_type|
+      densities_for_type = densities.map { |densities_for_doc| densities_for_doc.fetch(word_type, 0) }
+      Metric.new("#{word_type}_density", densities_for_type)
+    end
+  end
+
+  private
+
+  def calculate_densities(total_words, word_type_totals)
+    word_type_totals.reduce({}) do |h, (type, word_type_total)|
+      h[type] = Float(word_type_total) / Float(total_words)
+      h
+    end
+  end
+
+  def count_words_by_type(words)
+    word_type_totals = Hash.new(0)
+    words.each do |word|
+      category = word.category
+      next unless @word_types.include?(category)
+
+      word_type_totals[category] += 1
+    end
+
+    word_type_totals
   end
 end
 
-WORD_CATEGORIES.each do |category|
-  density_test = WordTypeDensityTest.new(documents, category)
-  metric = density_test.test
-  puts "test name: #{metric.name} values: #{metric.values}"
+density_test = WordTypeDensityTest.new(documents, WORD_CATEGORIES)
+metrics = density_test.test
+metrics.each do |metric|
+  puts "test: #{metric.name} values: #{metric.values}"
 end
