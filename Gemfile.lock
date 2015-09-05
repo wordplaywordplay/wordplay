@@ -7,15 +7,22 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
+    coderay (1.1.0)
     engtagger (0.2.0)
     json (1.8.3)
+    method_source (0.8.2)
     mime-types (1.25.1)
     progressbar (0.21.0)
+    pry (0.10.1)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
     rubyzip (0.9.9)
     scalpel (0.2.1)
     schiphol (1.0.1)
       progressbar (>= 0.10.0)
       rubyzip (~> 0.9.9)
+    slop (3.6.0)
     treat (2.1.0)
       birch
       schiphol
@@ -30,5 +37,6 @@ PLATFORMS
 DEPENDENCIES
   birch!
   engtagger
+  pry
   scalpel
   treat
