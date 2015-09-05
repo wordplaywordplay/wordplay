@@ -2,11 +2,13 @@ require 'bundler/setup'
 require 'treat'
 require 'scalpel'
 require 'engtagger'
+require 'pry'
 
 include Treat::Core::DSL
 
 if ARGV.size != 2
   puts "usage: [document_1] [document_2]"
+  exit
 end
 
 document_paths = ARGV
@@ -28,20 +30,29 @@ class DocumentTest
   end
 end
 
-class NounDensityTest < DocumentTest
+class WordTypeDensityTest < DocumentTest
+  def initialize(documents, word_type)
+    super(documents)
+    @word_type = word_type
+  end
+
   def test
     metric_values = documents.map do |document|
       words = document.words
-      nouns = words.select { |word| word.category == "noun" }
+      words_of_type = words.select { |word| word.category == @word_type }
 
       total_words = words.size
-      total_nouns = nouns.size
+      total_words_of_type = words_of_type.size
 
-      total_nouns / total_words
+      Float(total_words_of_type) / Float(total_words)
     end
 
-    Metric.new('noun_density', metric_values)
+    Metric.new("#{@word_type}_density", metric_values)
   end
 end
 
-puts NounDensityTest.new(documents).test
+noun_density_test = WordTypeDensityTest.new(documents, 'noun')
+puts noun_density_test.test
+
+verb_density_test = WordTypeDensityTest.new(documents, 'verb')
+puts verb_density_test.test
