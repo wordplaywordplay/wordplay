@@ -4,10 +4,12 @@ require 'scalpel'
 require 'engtagger'
 require 'pry'
 
+
+WORD_CATEGORIES = ["determiner", "adverb", "noun", "unknown", "verb", "pronoun", "conjunction", "preposition", "adjective", :unknown, "symbol", "interjection"]
 include Treat::Core::DSL
 
-if ARGV.size != 2
-  puts "usage: [document_1] [document_2]"
+if ARGV.empty?
+  puts "usage: [document_1] [document_2] ..."
   exit
 end
 
@@ -18,7 +20,6 @@ documents = document_paths.map do |path|
 
   document
 end
-
 
 Metric = Struct.new(:name, :values)
 
@@ -51,8 +52,8 @@ class WordTypeDensityTest < DocumentTest
   end
 end
 
-noun_density_test = WordTypeDensityTest.new(documents, 'noun')
-puts noun_density_test.test
-
-verb_density_test = WordTypeDensityTest.new(documents, 'verb')
-puts verb_density_test.test
+WORD_CATEGORIES.each do |category|
+  density_test = WordTypeDensityTest.new(documents, category)
+  metric = density_test.test
+  puts "test name: #{metric.name} values: #{metric.values}"
+end
