@@ -17,7 +17,7 @@ end
 document_paths = ARGV
 documents = document_paths.map do |path|
   document = document(path)
-  document.apply(:chunk, :segment, :tokenize)
+  document.apply(:chunk, :segment, :tokenize, :category)
 
   document
 end
